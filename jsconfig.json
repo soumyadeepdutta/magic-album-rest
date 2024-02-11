@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonJS",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "#app": ["./src/app.js"],
+      "#models": ["./src/db/models/index.js"],
+      "#errors": ["./src/utils/errors/custom-error.js"],
+      "#response": ["./src/utils/response.js"],
+      "#utils/*": ["./src/utils/*.js"],
+      "#middlewares/*": ["./src/api/middlewares/*.js"],
+      "#validators/*": ["./src/api/validators/*.js"]
+    }
+  }
+}
