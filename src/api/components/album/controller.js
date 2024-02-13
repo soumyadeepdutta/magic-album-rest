@@ -15,33 +15,36 @@ exports.create = async (req, res) => {
 
 /** @type {import("express").RequestHandler} */
 exports.upload = async (req, res) => {
-  try {
-    if (!req.files || Object.keys(req.files).length === 0) {
-      throw new BadRequestError('No files were uploaded');
-    }
-
-    const images = req.files.images;
-    const videos = req.files.videos;
-
-    // Upload images to S3
-    const uploadedImages = await Promise.all(
-      images.map(async (image) => {
-        // await uploadToS3(image);
-        return image.name;
-      })
+  if (
+    !req.files?.images ||
+    !req.files?.videos ||
+    Object.keys(req.files?.images).length !==
+      Object.keys(req.files?.videos).length
+  ) {
+    throw new BadRequestError(
+      'Same number of images and videos are required (minimum 2 pairs)'
     );
-
-    // Upload videos to S3
-    const uploadedVideos = await Promise.all(
-      videos.map(async (video) => {
-        // await uploadToS3(video);
-        return video.name;
-      })
-    );
-
-    return res.status(200).json({ uploadedImages, uploadedVideos });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ message: 'Internal server error' });
   }
+  const images = req.files.images;
+  const videos = req.files.videos;
+
+  // Upload images to S3
+  const uploadedImages = await Promise.all(
+    images.map(async (image) => {
+      // await uploadToS3(image);
+      return image.name;
+    })
+  );
+
+  // Upload videos to S3
+  const uploadedVideos = await Promise.all(
+    videos.map(async (video) => {
+      // await uploadToS3(video);
+      return video.name;
+    })
+  );
+
+  return res
+    .status(200)
+    .json({ uploadedImages, uploadedVideos, album: req.body.albumId });
 };
