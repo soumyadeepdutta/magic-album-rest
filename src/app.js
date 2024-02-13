@@ -5,7 +5,7 @@ const cors = require('cors');
 
 // const MongoStore = require('connect-mongo');
 const dotenv = require('dotenv');
-dotenv.config({ path: resolve('env', '.env') });
+dotenv.config();
 
 const errorHandling = require('./utils/errors/error-handler');
 
@@ -18,9 +18,10 @@ const { NotFoundError } = require('#errors');
 const app = express();
 app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
 
+app.use(express.static('public'));
 app.use(express.json());
 app.use(helmet());
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('ok');
 });
 
