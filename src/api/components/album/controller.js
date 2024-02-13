@@ -43,7 +43,7 @@ exports.upload = async (req, res) => {
   // Upload images to S3
   const uploadedImages = await Promise.all(
     images.map(async (image, index) => {
-      image.name = album + `${index}th.` + image.name.split('.').pop();
+      image.name = album + `_${index}th.` + image.name.split('.').pop();
       await uploadToS3(image);
       return image.name;
     })
@@ -56,6 +56,14 @@ exports.upload = async (req, res) => {
       await uploadToS3(video);
       return video.name;
     })
+  );
+
+  await models.album.update(
+    {
+      images: uploadedImages,
+      videos: uploadedVideos
+    },
+    { where: { id: album } }
   );
 
   return res.send(successResponse({ uploadedImages, uploadedVideos }));
