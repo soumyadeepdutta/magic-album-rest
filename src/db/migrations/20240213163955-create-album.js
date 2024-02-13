@@ -12,6 +12,11 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
+      user: {
+        type: Sequelize.INTEGER,
+        references: { model: 'users', key: 'id' },
+        onDelete: 'CASCADE'
+      },
       images: {
         type: Sequelize.ARRAY(Sequelize.STRING)
       },

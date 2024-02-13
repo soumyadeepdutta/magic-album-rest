@@ -9,11 +9,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      album.belongsTo(models.users, {
+        foreignKey: 'user',
+        as: 'owner'
+      });
     }
   }
   album.init(
     {
       name: DataTypes.STRING,
+      user: DataTypes.INTEGER,
       images: DataTypes.ARRAY(DataTypes.STRING),
       videos: DataTypes.ARRAY(DataTypes.STRING)
     },
