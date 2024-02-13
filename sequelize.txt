@@ -1,5 +1,5 @@
 npx sequelize-cli model:generate --name empanelment_form_responses --attributes request_id:string,supplier_id:integer,gst_no:integer,pan_no:integer,type_of_item_interested:string,established_on:integer,business_description:string,contact_person_name:string,contact_person_email:string,contact_person_designation:string,company_address:string,street_address:string,msme:boolean,pincode:string,state:string,city:string,linked_in:string,twitter:string,landline:string,fax_number:string,bank_account_number:string,ifsc_code:string,currency:string,bank_address:string,insured:boolean,insurance_validity:string,bonded:boolean,bond_details:string,licenced:boolean,turnover:string,previously_business:boolean,previously_business_since:string
-
+npx sequelize-cli model:generate --name album --attributes name:string,images:array,videos:array
 --- migrate ---
 npx sequelize-cli db:migrate
 
