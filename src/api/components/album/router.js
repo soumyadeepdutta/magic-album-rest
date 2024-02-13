@@ -12,6 +12,7 @@ router.post(
   create
 );
 router.get('/list', checkAuth(), list);
+router.get('/qr/:id', checkAuth(), list);
 router.post('/upload', checkAuth(), upload);
 
 module.exports = router;

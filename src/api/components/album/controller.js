@@ -2,6 +2,7 @@ const { BadRequestError } = require('#errors');
 const models = require('#models');
 const successResponse = require('#response');
 const { uploadToS3 } = require('#utils/aws/s3.func');
+const qrcode = require('#utils/qrcode');
 
 /** @type {import("express").RequestHandler} */
 exports.create = async (req, res) => {
@@ -58,4 +59,15 @@ exports.upload = async (req, res) => {
   );
 
   return res.send(successResponse({ uploadedImages, uploadedVideos }));
+};
+
+/** @type {import("express").RequestHandler} */
+exports.getQR = async (req, res) => {
+  const album = await models.album.findOne({
+    attributes: ['images', 'videos'],
+    where: { id: req.params.id }
+  });
+  if (!album) throw new BadRequestError('Invalid album id');
+  const qrbase64 = await qrcode(album);
+  return res.send(successResponse(qrbase64));
 };

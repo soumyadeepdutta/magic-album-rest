@@ -14,8 +14,8 @@ module.exports = {
         rejectUnauthorized: false
       },
       bigNumberStrings: true
-    }
-    // logging: false
+    },
+    logging: false
   }
   // test: {
   //   username: process.env.CI_DB_USERNAME,

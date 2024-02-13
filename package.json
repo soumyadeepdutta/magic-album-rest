@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
+    "qrcode": "^1.5.3",
     "sequelize": "^6.36.0"
   },
   "imports": {
