@@ -73,9 +73,11 @@ exports.upload = async (req, res) => {
 exports.getQR = async (req, res) => {
   const album = await models.album.findOne({
     attributes: ['images', 'videos'],
-    where: { id: req.params.id }
-  });
+    where: { id: req.params.id },
+    raw: true,
+    nest: true
+  }, );
   if (!album) throw new BadRequestError('Invalid album id');
-  const qrbase64 = await qrcode(album);
-  return res.send(successResponse(qrbase64));
+  const qrbase64 = await qrcode(JSON.stringify(album));
+  return res.send(successResponse({data:qrbase64}));
 };
