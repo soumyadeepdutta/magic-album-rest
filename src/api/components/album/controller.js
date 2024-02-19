@@ -69,6 +69,9 @@ exports.upload = async (req, res) => {
   return res.send(successResponse({ uploadedImages, uploadedVideos }));
 };
 
+function addUrlPrefix(array) {
+  return array.map(item => process.env.AWS_URL + item);
+}
 /** @type {import("express").RequestHandler} */
 exports.getQR = async (req, res) => {
   const album = await models.album.findOne({
@@ -76,8 +79,29 @@ exports.getQR = async (req, res) => {
     where: { id: req.params.id },
     raw: true,
     nest: true
-  }, );
+  });
   if (!album) throw new BadRequestError('Invalid album id');
-  const qrbase64 = await qrcode(JSON.stringify(album));
-  return res.send(successResponse({data:qrbase64}));
+  const data = {
+    images: addUrlPrefix(album.images),
+    videos: addUrlPrefix(album.videos)
+  }
+  await uploadToS3({name: `${req.params.id}.txt`, data: JSON.stringify(data)})
+  const qrbase64 = await qrcode(process.env.AWS_URL + `${req.params.id}.txt`);
+  return res.send(successResponse({ data: qrbase64 }));
 };
+
+/** @type {import("express").RequestHandler} */
+exports.getDetails = async (req, res) => {
+  const album = await models.album.findOne({
+    where: { id: req.params.id },
+    raw: true,
+    nest: true
+  });
+  if (!album) throw new BadRequestError('Invalid album id');
+  const data = {
+    ...album,
+    images: addUrlPrefix(album.images),
+    videos: addUrlPrefix(album.videos)
+  }
+  return res.send(successResponse(data))
+}
