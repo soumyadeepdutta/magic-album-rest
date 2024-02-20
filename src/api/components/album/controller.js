@@ -1,4 +1,4 @@
-const { BadRequestError } = require('#errors');
+const { BadRequestError, NotFoundError } = require('#errors');
 const models = require('#models');
 const successResponse = require('#response');
 const { uploadToS3 } = require('#utils/aws/s3.func');
@@ -18,9 +18,21 @@ exports.list = async (req, res) => {
   const albums = await models.album.findAll({
     where: {
       user: req.authUser.id
-    }
+    },
+    raw: true,
+    nest: true
   });
-  return res.send(successResponse(albums));
+  if (!albums) throw new NotFoundError();
+
+  return res.send(
+    successResponse(
+      albums.map((item) => ({
+        ...item,
+        images: addUrlPrefix(item.images),
+        videos: addUrlPrefix(item.videos)
+      }))
+    )
+  );
 };
 
 /** @type {import("express").RequestHandler} */
@@ -70,7 +82,9 @@ exports.upload = async (req, res) => {
 };
 
 function addUrlPrefix(array) {
-  return array.map(item => process.env.AWS_URL + item);
+  if (Array.isArray(array) && array instanceof Array)
+    return array.map((item) => process.env.AWS_URL + item);
+  else return array;
 }
 /** @type {import("express").RequestHandler} */
 exports.getQR = async (req, res) => {
@@ -84,8 +98,11 @@ exports.getQR = async (req, res) => {
   const data = {
     images: addUrlPrefix(album.images),
     videos: addUrlPrefix(album.videos)
-  }
-  await uploadToS3({name: `${req.params.id}.txt`, data: JSON.stringify(data)})
+  };
+  await uploadToS3({
+    name: `${req.params.id}.txt`,
+    data: JSON.stringify(data)
+  });
   const qrbase64 = await qrcode(process.env.AWS_URL + `${req.params.id}.txt`);
   return res.send(successResponse({ data: qrbase64 }));
 };
@@ -102,6 +119,6 @@ exports.getDetails = async (req, res) => {
     ...album,
     images: addUrlPrefix(album.images),
     videos: addUrlPrefix(album.videos)
-  }
-  return res.send(successResponse(data))
-}
+  };
+  return res.send(successResponse(data));
+};
