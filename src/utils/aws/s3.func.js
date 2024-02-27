@@ -18,8 +18,8 @@ exports.uploadToS3 = function (file) {
     try {
       const command = new PutObjectCommand({
         Bucket: config.AWS_BUCKET_NAME,
-        Key: file.name,
-        Body: file.data
+        Key: file.originalname,
+        Body: file.buffer
       });
 
       S3.send(command)

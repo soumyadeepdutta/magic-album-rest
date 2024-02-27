@@ -1,7 +1,7 @@
 const express = require('express');
 require('express-async-errors');
 const cors = require('cors');
-const fileUpload = require('express-fileupload');
+// const fileUpload = require('express-fileupload');
 
 // const MongoStore = require('connect-mongo');
 const dotenv = require('dotenv');
@@ -16,12 +16,12 @@ const { default: helmet } = require('helmet');
 const { NotFoundError } = require('#errors');
 
 const app = express();
-app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
+app.use(cors());
 
 app.use(express.static('public'));
 app.use(express.json());
 app.use(helmet());
-app.use(fileUpload({ limits: '50mb' }));
+// app.use(fileUpload({ limits: '50mb' }));
 app.get('/api', (req, res) => {
   res.send('ok');
 });

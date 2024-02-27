@@ -37,6 +37,8 @@ exports.list = async (req, res) => {
 
 /** @type {import("express").RequestHandler} */
 exports.upload = async (req, res) => {
+  // console.log(req.files?.images, 'images');
+  // console.log(req.files?.videos, 'videos');
   if (
     !req.files?.images ||
     !req.files?.videos ||
@@ -44,7 +46,7 @@ exports.upload = async (req, res) => {
       Object.keys(req.files?.videos).length
   ) {
     throw new BadRequestError(
-      'Same number of images and videos are required (minimum 2 pairs)'
+      'Same number of images and videos are required (minimum 1 pairs)'
     );
   }
   if (!req.body.albumId) throw new BadRequestError('albumId is required');
@@ -55,18 +57,20 @@ exports.upload = async (req, res) => {
   // Upload images to S3
   const uploadedImages = await Promise.all(
     images.map(async (image, index) => {
-      image.name = album + `_${index}th.` + image.name.split('.').pop();
+      image.originalname =
+        album + `_${index}th.` + image.originalname.split('.').pop();
       await uploadToS3(image);
-      return image.name;
+      return image.originalname;
     })
   );
 
   // Upload videos to S3
   const uploadedVideos = await Promise.all(
     videos.map(async (video, index) => {
-      video.name = album + `_${index}th.` + video.name.split('.').pop();
+      video.originalname =
+        album + `_${index}th.` + video.originalname.split('.').pop();
       await uploadToS3(video);
-      return video.name;
+      return video.originalname;
     })
   );
 
@@ -100,8 +104,8 @@ exports.getQR = async (req, res) => {
     videos: addUrlPrefix(album.videos)
   };
   await uploadToS3({
-    name: `${req.params.id}.txt`,
-    data: JSON.stringify(data)
+    originalname: `${req.params.id}.txt`,
+    buffer: JSON.stringify(data)
   });
   const qrbase64 = await qrcode(process.env.AWS_URL + `${req.params.id}.txt`);
   return res.send(successResponse({ data: qrbase64 }));
