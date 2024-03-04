@@ -16,9 +16,9 @@ const { default: helmet } = require('helmet');
 const { NotFoundError } = require('#errors');
 
 const app = express();
-app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
+app.use(cors({ origin: '*', credentials: true }));
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
 app.use(express.json());
 app.use(helmet());
 app.use(fileUpload({ limits: 100 * 1024 * 1024 }));
