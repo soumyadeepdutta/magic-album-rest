@@ -21,7 +21,7 @@ app.use(cors({ origin: process.env.ORIGIN, credentials: true }));
 app.use(express.static('public'));
 app.use(express.json());
 app.use(helmet());
-app.use(fileUpload({ limits: '50mb' }));
+app.use(fileUpload({ limits: 100 * 1024 * 1024 }));
 app.get('/api', (req, res) => {
   res.send('ok');
 });
