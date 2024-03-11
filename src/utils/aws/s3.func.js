@@ -1,7 +1,8 @@
 const {
   S3Client,
   GetObjectCommand,
-  PutObjectCommand
+  PutObjectCommand,
+  DeleteObjectCommand
 } = require('@aws-sdk/client-s3');
 const { config } = require('./s3.config');
 
@@ -31,6 +32,23 @@ exports.uploadToS3 = function (file) {
         });
     } catch (error) {
       reject(error);
+    }
+  });
+};
+
+exports.deleteFileFroms3 = function (fileName) {
+  return new Promise(async (resolve, reject) => {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: config.AWS_BUCKET_NAME,
+      Key: fileName
+    });
+
+    try {
+      const response = await S3.send(deleteCommand);
+      resolve(response);
+    } catch (err) {
+      // Handle the error or throw
+      return reject(err);
     }
   });
 };

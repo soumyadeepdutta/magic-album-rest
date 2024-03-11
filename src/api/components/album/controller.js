@@ -1,11 +1,16 @@
 const { BadRequestError, NotFoundError } = require('#errors');
 const models = require('#models');
 const successResponse = require('#response');
-const { uploadToS3 } = require('#utils/aws/s3.func');
+const { uploadToS3, deleteFileFroms3 } = require('#utils/aws/s3.func');
 const qrcode = require('#utils/qrcode');
 
 /** @type {import("express").RequestHandler} */
 exports.create = async (req, res) => {
+  const isAlbumExist = await models.album.findOne({
+    where: { name: req.body.name }
+  });
+  if (isAlbumExist !== null) throw new BadRequestError('Name already exist!');
+
   const album = await models.album.create({
     ...req.body,
     user: req.authUser.id
@@ -49,16 +54,18 @@ exports.upload = async (req, res) => {
       'Same number of images and videos are required (minimum 1 pairs)'
     );
   }
-  if (!req.body.albumId) throw new BadRequestError('albumId is required');
+  if (!req.body.albumId) throw new BadRequestError('album id is required');
+  if (!req.body.albumName) throw new BadRequestError('album name is required');
   const images = req.files.images;
   const videos = req.files.videos;
-  const album = req.body.albumId;
+  const albumId = req.body.albumId;
+  const albumName = req.body.albumName.replace(/\s/g, '');
 
   // Upload images to S3
   const uploadedImages = await Promise.all(
     images.map(async (image, index) => {
       image.originalname =
-        album + `_${index}th.` + image.originalname.split('.').pop();
+        albumName + `_${index}.` + image.originalname.split('.').pop();
       await uploadToS3(image);
       return image.originalname;
     })
@@ -68,7 +75,7 @@ exports.upload = async (req, res) => {
   const uploadedVideos = await Promise.all(
     videos.map(async (video, index) => {
       video.originalname =
-        album + `_${index}th.` + video.originalname.split('.').pop();
+        albumName + `_${index}.` + video.originalname.split('.').pop();
       await uploadToS3(video);
       return video.originalname;
     })
@@ -79,7 +86,7 @@ exports.upload = async (req, res) => {
       images: uploadedImages,
       videos: uploadedVideos
     },
-    { where: { id: album } }
+    { where: { id: albumId } }
   );
 
   return res.send(successResponse({ uploadedImages, uploadedVideos }));
@@ -125,4 +132,39 @@ exports.getDetails = async (req, res) => {
     videos: addUrlPrefix(album.videos)
   };
   return res.send(successResponse(data));
+};
+
+/** @type {import("express").RequestHandler} */
+exports.deleteAlbum = async (req, res) => {
+  const album = await models.album.findOne({
+    where: { id: req.params.id },
+    raw: true,
+    nest: true
+  });
+  if (!album) throw new BadRequestError('Invalid album id');
+
+  const images = album.images,
+    videos = album.videos;
+
+  // delete images
+  await Promise.all(
+    images.map(async (image) => {
+      await deleteFileFroms3(image);
+    })
+  );
+
+  // delete videos
+  await Promise.all(
+    videos.map(async (video) => {
+      await deleteFileFroms3(video);
+    })
+  );
+
+  await models.album.destroy({
+    where: {
+      id: req.params.id
+    }
+  });
+
+  return res.send(successResponse('Deleted'));
 };
