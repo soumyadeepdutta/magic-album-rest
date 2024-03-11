@@ -14,14 +14,15 @@ const authRouter = require('./api/components/auth/router');
 
 const { default: helmet } = require('helmet');
 const { NotFoundError } = require('#errors');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 app.use(cors());
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
 app.use(express.json());
 app.use(helmet());
-// app.use(fileUpload({ limits: '50mb' }));
+app.use(fileUpload({ limits: 100 * 1024 * 1024 }));
 app.get('/api', (req, res) => {
   res.send('ok');
 });
