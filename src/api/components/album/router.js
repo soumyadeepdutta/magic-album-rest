@@ -30,10 +30,8 @@ router.post(
 );
 router.get('/list', checkAuth(), list);
 router.get('/qr/:id', checkAuth(), getQR);
-router
-  .route('/:id')
-  .get(checkAuth(), getDetails)
-  .delete(checkAuth(), deleteAlbum);
+router.route('/:id').get(checkAuth(), getDetails);
+// .delete(checkAuth(), deleteAlbum);
 router.post('/upload', checkAuth(), multerMiddleware, upload);
 
 module.exports = router;
