@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       user: DataTypes.INTEGER,
       images: DataTypes.ARRAY(DataTypes.STRING),
-      videos: DataTypes.ARRAY(DataTypes.STRING)
+      videos: DataTypes.ARRAY(DataTypes.STRING),
+      size: DataTypes.INTEGER
     },
     {
       sequelize,

@@ -61,6 +61,15 @@ exports.upload = async (req, res) => {
   const albumId = req.body.albumId;
   const albumName = req.body.albumName.replace(/\s/g, '');
 
+  const imageSize = images.reduce((acc, cur) => {
+      return (acc += cur.size);
+    }, 0),
+    vidSize = videos.reduce((acc, cur) => {
+      return (acc += cur.size);
+    }, 0);
+
+  const totalSize = imageSize + vidSize;
+
   // Upload images to S3
   const uploadedImages = await Promise.all(
     images.map(async (image, index) => {
@@ -84,7 +93,8 @@ exports.upload = async (req, res) => {
   await models.album.update(
     {
       images: uploadedImages,
-      videos: uploadedVideos
+      videos: uploadedVideos,
+      size: totalSize
     },
     { where: { id: albumId } }
   );
