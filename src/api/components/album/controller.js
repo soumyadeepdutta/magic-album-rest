@@ -110,7 +110,7 @@ function addUrlPrefix(array) {
 /** @type {import("express").RequestHandler} */
 exports.getQR = async (req, res) => {
   const album = await models.album.findOne({
-    attributes: ['images', 'videos'],
+    attributes: ['images', 'videos', 'size'],
     where: { id: req.params.id },
     raw: true,
     nest: true
@@ -118,8 +118,10 @@ exports.getQR = async (req, res) => {
   if (!album) throw new BadRequestError('Invalid album id');
   const data = {
     images: addUrlPrefix(album.images),
-    videos: addUrlPrefix(album.videos)
+    videos: addUrlPrefix(album.videos),
+    totalSize: album.size
   };
+
   await uploadToS3({
     originalname: `${req.params.id}.txt`,
     buffer: JSON.stringify(data)
