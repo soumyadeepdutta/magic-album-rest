@@ -132,7 +132,7 @@ exports.getQR = async (req, res) => {
     buffer: JSON.stringify(data)
   });
   const qrbase64 = await qrcode(
-    `https://api.magicalbum.in/api/album/qr-data/${req.params.id}`
+   `https://api.magicalbum.in/api/album/qr-data/${req.params.id}`
   );
   return res.send(successResponse({ data: qrbase64 }));
 };
