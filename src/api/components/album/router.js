@@ -6,6 +6,7 @@ const {
   upload,
   list,
   getQR,
+  getFileFromQRUrl,
   getDetails,
   deleteAlbum
 } = require('./controller');
@@ -30,6 +31,7 @@ router.post(
 );
 router.get('/list', checkAuth(), list);
 router.get('/qr/:id', checkAuth(), getQR);
+router.get('/qr-data/:id', getFileFromQRUrl);
 router.route('/:id').get(checkAuth(), getDetails);
 // .delete(checkAuth(), deleteAlbum);
 router.post('/upload', checkAuth(), multerMiddleware, upload);

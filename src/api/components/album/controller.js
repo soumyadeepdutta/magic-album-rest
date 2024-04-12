@@ -1,7 +1,12 @@
 const { BadRequestError, NotFoundError } = require('#errors');
 const models = require('#models');
 const successResponse = require('#response');
-const { uploadToS3, deleteFileFroms3 } = require('#utils/aws/s3.func');
+const {
+  uploadToS3,
+  deleteFileFroms3,
+  downloadFromS3,
+  getFromS3
+} = require('#utils/aws/s3.func');
 const qrcode = require('#utils/qrcode');
 
 /** @type {import("express").RequestHandler} */
@@ -126,8 +131,40 @@ exports.getQR = async (req, res) => {
     originalname: `${req.params.id}.txt`,
     buffer: JSON.stringify(data)
   });
-  const qrbase64 = await qrcode(process.env.AWS_URL + `${req.params.id}.txt`);
+  const qrbase64 = await qrcode(
+    `https://api.magicalbum.in/api/album/qr-data/${req.params.id}`
+  );
   return res.send(successResponse({ data: qrbase64 }));
+};
+
+/** @type {import("express").RequestHandler} */
+exports.getFileFromQRUrl = async (req, res) => {
+  const fileId = req.params.id;
+
+  if (
+    req.headers['x-unity-request'] ||
+    req.headers['user-agent'].includes('Unity')
+  ) {
+    // return res.send(process.env.AWS_URL + `${fileId}.txt`);
+    const album = await models.album.findOne({
+      attributes: ['images', 'videos', 'size'],
+      where: { id: req.params.id },
+      raw: true,
+      nest: true
+    });
+    if (!album) throw new BadRequestError('Invalid album id');
+    const data = {
+      images: addUrlPrefix(album.images),
+      videos: addUrlPrefix(album.videos),
+      totalSize: album.size
+    };
+    return res.send(data);
+
+  } else {
+    return res.redirect(
+      'https://magicalbum.s3.ap-south-1.amazonaws.com/index.html'
+    );
+  }
 };
 
 /** @type {import("express").RequestHandler} */
