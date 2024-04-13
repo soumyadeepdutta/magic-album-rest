@@ -162,7 +162,7 @@ exports.getFileFromQRUrl = async (req, res) => {
 
   } else {
     return res.redirect(
-      'https://magicalbum.s3.ap-south-1.amazonaws.com/index.html'
+      'https://deeplinkingpage.s3.ap-south-1.amazonaws.com/index.html'
     );
   }
 };
